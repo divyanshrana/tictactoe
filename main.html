@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <style>
+            body{
+                background-color: #e5e5e5;
+                font-family: 'Orbitron', sans-serif;
+            }
+            .grid-container{
+                padding-top: 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+            }
+            .grid-item{
+                border: 5px solid #2c3e50;
+                width: 20vh;
+                height: 20vh;
+                background-color: #34495e;
+                text-align: center;
+                font-size: 36px;
+                font-family: 'Orbitron', sans-serif;
+                border-radius: 5px;
+                font-weight: bold;
+                color: white;
+
+            }
+            .grid-item:hover{
+                background-color: yellow;
+                transition: all 0.1s ease-in;
+                color: black;
+            }
+
+            .button{
+                padding: 20px 40px 20px 40px;
+                margin-bottom: 20px;
+            }
+
+            #board{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-flow: column;
+                padding: 20px;
+            }
+            .score-board{
+                padding: 20px;
+                border: 5px solid black;
+                border-radius: 10px;
+                background-color: #ea9a96;
+                font-size: 36px;
+                color:white;
+
+            }
+            header{
+                font-family: 'Orbitron', sans-serif;
+                border: 10px double white;
+                border-radius: 4px;
+                background-color: #2c3e50;
+                color:yellow;
+                display: flex;
+                justify-content: center;
+                padding: 10px;
+            }
+            #modal{
+                display: none; 
+                z-index: 1; 
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0);
+                background: rgba(0,0,0,0.4);
+                overflow: auto;
+                position: fixed;
+
+            }
+            #modal-content{
+                background-color: white;
+                margin: auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 60%;
+            }
+
+
+        </style>
+    </head>
+    <body>
+        <header><h1>TIC TAC TOE</h1></header>
+        <div class="row">
+            <div class="col-md-8">
+                <table id="grid-box" class="grid-container">
+                    <tr>
+                        <td id='1' class="grid-item" onclick="change(id)"></td>
+                        <td id='2' class="grid-item" onclick="change(id)"></td>
+                        <td id='3' class="grid-item" onclick="change(id)"></td>
+                    </tr>
+                    <tr>
+                        <td id='4' class="grid-item" onclick="change(id)"></td>
+                        <td id='5' class="grid-item" onclick="change(id)"></td>
+                        <td id='6' class="grid-item" onclick="change(id)"></td>
+                    </tr>
+                    <tr>
+                        <td id='7' class="grid-item" onclick="change(id)"></td>
+                        <td id='8' class="grid-item" onclick="change(id)"></td>
+                        <td id='9' class="grid-item" onclick="change(id)"></td>
+                    </tr>
+
+                </table>
+            </div>
+            <div id="board" class="col-md-4"> <button class="button" onclick="reset()">Reset</button> </div>
+        </div>
+        <div id='modal'><div id='modal-content'><span class="close">&times;</span></div></div>
+        <script>
+            let xwins=0;
+            let owins=0;
+            let temp="X";
+            var mainsum=0;
+            var arr=[[0,0,0],
+                     [0,0,0],
+                     [0,0,0]];
+            var modal=document.getElementById('modal');
+
+            var span = document.getElementsByClassName("close")[0];
+
+            const scoreBoard= document.createElement("div");
+            scoreBoard.classList.add("score-board");
+            document.getElementById("board").appendChild(scoreBoard);
+
+            scoreBoard.textContent="Score Board";
+
+            const xscore=document.createElement("div");
+            xscore.textContent="X: 0";
+            xscore.classList.add("x-score");
+            scoreBoard.appendChild(xscore);
+
+            const yscore=document.createElement("div");
+            yscore.textContent="O: 0";
+            yscore.classList.add("o-score");
+            scoreBoard.appendChild(yscore);
+
+            const updateScoreBoard=()=>{
+                var list = document.getElementsByClassName("score-board")[0];
+                list.getElementsByClassName("x-score")[0].innerHTML = "X: "+xwins;
+                list.getElementsByClassName("o-score")[0].innerHTML = "O: "+owins;
+            }
+
+            const reset=()=>{
+                mainsum=0;
+                for(let i=0;i<3;i++){
+                    for(let y=0;y<3;y++){
+                        arr[i][y]=0;
+                    }
+                }
+                setTimeout(function(){
+                    for(let i=1;i<=9;i++){
+                        document.getElementById(i).innerHTML="";
+                    }
+                },1500);
+            }
+
+
+            const checkRows=() =>{
+                let r=0;
+                for(let i=0;i<3;i++){
+                    sum=0;
+                    if(r==3){
+                        break;
+                    }
+                    for(let y=0;y<3;y++){
+                        sum=sum+arr[r][y];
+                    }
+                    if(sum==3){
+                        xwins++;
+                        displayWinner("X");
+                    }
+                    else if(sum==-3){
+                        owins++; 
+                        displayWinner("O"); 
+                    }
+                    r++;
+                }
+                return "none";
+            }
+            const checkColumns=() =>{
+                let c=0;
+                for(let i=0;i<3;i++){
+                    sum=0;
+                    if(c==3){
+                        break;
+                    }
+                    for(let y=0;y<3;y++){
+                        sum=sum+arr[y][c];
+                    }
+                    if(sum==3){
+                        xwins++;
+                        displayWinner("X");    
+                    }
+                    else if(sum==-3){
+                        owins++;
+                        displayWinner("O");
+                    }
+                    c++;
+                }
+            }
+
+            const checkDiagnols=()=>{
+                if(arr[0][0]+arr[1][1]+arr[2][2]==3){
+                    xwins++;
+                    displayWinner("X");
+                }
+                else if(arr[0][0]+arr[1][1]+arr[2][2]==-3){
+                    owins++;
+                    displayWinner("O");;
+                }
+                else if(arr[2][0]+arr[1][1]+arr[0][2]==3){
+                    xwins++;
+                    displayWinner("X");
+                }
+                else if(arr[2][0]+arr[1][1]+arr[0][2]==-3){
+                    owins++;
+                    displayWinner("O");
+                }
+
+            }
+
+            const checkWinner=()=>{
+                checkRows(); 
+                checkColumns();
+                checkDiagnols();
+            }
+
+            const change=(id)=>{
+                if(document.getElementById(id).innerHTML !=""){
+                    return;
+                }
+                document.getElementById(id).innerHTML=temp;
+
+                if(id==1){
+                    if(temp==="X"){
+                        arr[0][0]=1;
+                    }
+                    else{
+                        arr[0][0]=-1;
+                    }
+                }
+                else if(id==2){
+                    if(temp=="X"){
+                        arr[0][1]=1;
+                    }
+                    else{
+                        arr[0][1]=-1;
+                    }
+                }
+                else if(id==3){
+                    if(temp=="X"){
+                        arr[0][2]=1
+                    }
+                    else{
+                        arr[0][2]=-1;
+                    }
+                }
+                if(id==4){
+                    if(temp==="X"){
+                        arr[1][0]=1;
+                    }
+                    else{
+                        arr[1][0]=-1;
+                    }
+                }
+                else if(id==5){
+                    if(temp=="X"){
+                        arr[1][1]=1;
+                    }
+                    else{
+                        arr[1][1]=-1;
+                    }
+                }
+                else if(id==6){
+                    if(temp=="X"){
+                        arr[1][2]=1
+                    }
+                    else{
+                        arr[1][2]=-1;
+                    }
+                }
+                if(id==7){
+                    if(temp==="X"){
+                        arr[2][0]=1;
+                    }
+                    else{
+                        arr[2][0]=-1;
+                    }
+                }
+                else if(id==8){
+                    if(temp=="X"){
+                        arr[2][1]=1;
+                    }
+                    else{
+                        arr[2][1]=-1;
+                    }
+                }
+                else if(id==9){
+                    if(temp=="X"){
+                        arr[2][2]=1
+                    }
+                    else{
+                        arr[2][2]=-1;
+                    }
+                }
+
+                mainsum++;
+                checkWinner();
+
+                if(mainsum == 9){
+                    reset();
+                    var content=document.getElementById('modal-content');
+                    content.innerHTML="Its a DRAW!";
+                    modal.style.display="block";
+                    setTimeout(function(){
+                        modal.style.display="none";    
+                    },1500);
+
+                }
+                temp =changeTemp(temp);
+            }
+            const displayWinner=(s)=>{
+                updateScoreBoard();
+                reset();
+                console.log("disp "+mainsum);
+                var content=document.getElementById('modal-content');
+                content.innerHTML=s+" is the Winner";
+                modal.style.display="block";
+                setTimeout(function(){
+                    modal.style.display="none";    
+                },1500);
+            }
+            const changeTemp=(temp)=>{
+                if(temp==="X"){
+                    return "O";
+                }
+                else{
+                    return "X";
+                }
+            }
+
+        </script>
+    </body>
+</html>
